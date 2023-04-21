@@ -31,7 +31,7 @@ st.write(good_deals)
 
 def extract_lat_lng(address):
     try:
-        geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key=AIzaSyD4EZjIMyqry2VYI9RimEwsr6a3c3xPKB4"
+        geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key=INSERTKEY"
         response = requests.get(geocode_url)
         location_data = response.json()
         lat_lng = location_data['results'][0]['geometry']['location']

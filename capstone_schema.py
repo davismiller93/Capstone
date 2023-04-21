@@ -6,17 +6,19 @@ Base = declarative_base()
 
 class Property(Base):
     __tablename__ = 'properties'
+    __table_args__ = {'schema': 'capstone'}
     id = Column(Integer, primary_key=True)
     status = Column(String)
     status_text = Column(String)
     preforclosure = Column(Boolean)
-
+    
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Address(Base):
     __tablename__ = 'addresses'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     address = Column(String, primary_key=True)
     street = Column(String)
     city = Column(String)
@@ -29,7 +31,8 @@ class Address(Base):
 
 class Price(Base):
     __tablename__ = 'prices'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     price = Column(Float)
     zestimate = Column(Integer)
     rent_zestimate = Column(Integer)
@@ -41,7 +44,8 @@ class Price(Base):
 
 class SingleFamily(Base):
     __tablename__ = 'single_family'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     beds = Column(Integer)
     baths = Column(Integer)
     area = Column(Integer)
@@ -53,7 +57,8 @@ class SingleFamily(Base):
 
 class MultiFamily(Base):
     __tablename__ = 'multi_family'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     beds = Column(Integer)
     baths = Column(Integer)
     area = Column(Integer)
@@ -65,7 +70,8 @@ class MultiFamily(Base):
 
 class Townhome(Base):
     __tablename__ = 'townhomes'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     beds = Column(Integer)
     baths = Column(Integer)
     area = Column(Integer)
@@ -77,7 +83,8 @@ class Townhome(Base):
 
 class Condo(Base):
     __tablename__ = 'condos'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     beds = Column(Integer)
     baths = Column(Integer)
     area = Column(Integer)
@@ -89,7 +96,8 @@ class Condo(Base):
 
 class Apartment(Base):
     __tablename__ = 'apartments'
-    id = Column(Integer, ForeignKey('properties.id'), primary_key=True)
+    __table_args__ = {'schema': 'capstone'}
+    id = Column(Integer, ForeignKey('capstone.properties.id'), primary_key=True)
     beds = Column(Integer)
     baths = Column(Integer)
     area = Column(Integer)
@@ -104,9 +112,15 @@ def schema_exists(engine, schema_name='public'):
     query = text(f"SELECT schema_name FROM information_schema.schemata WHERE schema_name='{schema_name}';")
     return bool(engine.execute(query).scalar())
 
-engine = create_engine("postgresql://postgres: @localhost/capstone")
+def create_schema(engine, schema_name='capstone'):
+    if not schema_exists(engine, schema_name):
+        query = text(f"CREATE SCHEMA {schema_name};")
+        engine.execute(query)
+        Base.metadata.create_all(engine, checkfirst=True)
+    else:
+        print(f"The {schema_name} schema already exists.")
+        Base.metadata.create_all(engine, checkfirst=True)
 
-if not schema_exists(engine, 'public'):
-    Base.metadata.create_all(engine, checkfirst=True)
-else:
-    print("The public schema already exists.")
+if __name__ == '__main__':
+    engine = create_engine("postgresql://postgres: @localhost/capstone")
+    create_schema(engine, 'capstone')
