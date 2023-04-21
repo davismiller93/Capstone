@@ -8,7 +8,7 @@ st.set_page_config(layout="wide")
 
 st.title("Real Estate Investment Analysis Tool")
 
-limit = 100
+limit = 1000
 response = requests.get(f"http://localhost:5000/properties?limit={limit}")
 
 print("Status code:", response.status_code)
